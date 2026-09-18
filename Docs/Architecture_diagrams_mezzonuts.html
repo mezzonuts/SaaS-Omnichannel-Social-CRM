@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Architecture Diagrams – AutoChat Hub (made by mezzonuts)</title>
+<style>
+  body{font-family:'JetBrains Mono',monospace;background:#020617;color:#e2e8f0;margin:0;padding:0;}
+  .container{max-width:1200px;margin:auto;padding:2rem;}
+  h1{font-size:1.8rem;color:#22d3ee;margin-bottom:1rem;display:flex;align-items:center;}
+  h1 .dot{width:10px;height:10px;border-radius:50%;background:#22d3ee;margin-left:0.5rem;animation:pulse 2s infinite;}
+  @keyframes pulse{0%{opacity:1;}50%{opacity:0.3;}100%{opacity:1;}}
+  h2{font-size:1.4rem;color:#34d399;margin-top:2rem;}
+  .diagram{background:#0f172a;padding:1rem;margin-top:1rem;border-radius:8px;position:relative;border:1px solid #1e293b;}
+  .remark{font-size:0.8rem;color:#94a3b8;margin-top:0.4rem;text-align:right;}
+  /* Simple arrow marker */
+  svg{width:100%;height:auto;}
+  .arrow{stroke:#34d399;stroke-width:1.5;fill:none;marker-end:url(#arrowhead);}
+  .box{fill:rgba(6,78,59,0.4);stroke:#34d399;stroke-width:1.5;rx:6;}
+  .box-f{fill:rgba(8,51,68,0.4);stroke:#22d3ee;stroke-width:1.5;rx:6;}
+  .box-db{fill:rgba(76,29,149,0.4);stroke:#a78bfa;stroke-width:1.5;rx:6;}
+  .box-cloud{fill:rgba(120,53,15,0.3);stroke:#fbbf24;stroke-width:1.5;rx:6;}
+  .box-sec{fill:rgba(136,19,55,0.4);stroke:#fb7185;stroke-width:1.5;rx:6;}
+  .box-bus{fill:rgba(251,146,60,0.3);stroke:#fb923c;stroke-width:1.5;rx:6;}
+  text{font-size:9px;fill:#e2e8f0;pointer-events:none;}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>AutoChat Hub Architecture Diagrams <span class="dot"></span></h1>
+
+<h2>1️⃣ RAG Pipeline Overview (End‑to‑End)</h2>
+<div class="diagram">
+<svg viewBox="0 0 800 300">
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#34d399" />
+    </marker>
+  </defs>
+  <!-- Ingestion Layer -->
+  <rect x="20" y="20" width="140" height="60" class="box-f" />
+  <text x="30" y="45">Source Docs</text>
+  <rect x="180" y="20" width="140" height="60" class="box-f" />
+  <text x="190" y="45">Document Parser</text>
+  <rect x="340" y="20" width="140" height="60" class="box-f" />
+  <text x="350" y="45">Text Chunker</text>
+  <rect x="500" y="20" width="140" height="60" class="box-f" />
+  <text x="510" y="45">Embedder Model</text>
+  <rect x="660" y="20" width="140" height="60" class="box-f" />
+  <text x="670" y="45">Vector Store</text>
+  <!-- arrows -->
+  <line x1="160" y1="50" x2="180" y2="50" class="arrow" />
+  <line x1="320" y1="50" x2="340" y2="50" class="arrow" />
+  <line x1="480" y1="50" x2="500" y2="50" class="arrow" />
+  <line x1="640" y1="50" x2="660" y2="50" class="arrow" />
+  <!-- Query Processing -->
+  <rect x="20" y="120" width="180" height="70" class="box" />
+  <text x="30" y="150">User Message</text>
+  <rect x="220" y="120" width="180" height="70" class="box" />
+  <text x="230" y="150">Query Intent Classifier</text>
+  <rect x="420" y="120" width="180" height="70" class="box" />
+  <text x="430" y="150">Query Embedder</text>
+  <rect x="620" y="120" width="180" height="70" class="box" />
+  <text x="630" y="150">Hybrid Retriever</text>
+  <line x1="200" y1="155" x2="220" y2="155" class="arrow" />
+  <line x1="400" y1="155" x2="420" y2="155" class="arrow" />
+  <line x1="600" y1="155" x2="620" y2="155" class="arrow" />
+  <!-- Generation -->
+  <rect x="20" y="220" width="300" height="70" class="box" />
+  <text x="30" y="250">LLM Agent (Gemini/Groq)</text>
+  <line x1="320" y1="255" x2="340" y2="255" class="arrow" />
+  <rect x="340" y="220" width="200" height="70" class="box" />
+  <text x="350" y="250">Response</text>
+  <!-- Feedback Loop -->
+  <rect x="620" y="220" width="180" height="70" class="box" />
+  <text x="630" y="250">User Rating</text>
+  <line x1="800" y1="255" x2="820" y2="255" class="arrow" />
+  <text x="660" y="210" fill="#94a3b8" font-size="8">Feedback Loop (not shown)</text>
+</svg>
+<div class="remark">made by mezzonuts</div>
+</div>
+
+<h2>2️⃣ Multi‑Source Knowledge Base Architecture</h2>
+<div class="diagram">
+<svg viewBox="0 0 800 200">
+  <defs><marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#22d3ee"/></marker></defs>
+  <rect x="50" y="20" width="180" height="60" class="box-db" />
+  <text x="60" y="45">3GPP Specs</text>
+  <rect x="280" y="20" width="180" height="60" class="box-f" />
+  <text x="290" y="45">Product Manuals</text>
+  <rect x="510" y="20" width="180" height="60" class="box-sec" />
+  <text x="520" y="45">Troubleshooting Guides</text>
+  <line x1="230" y1="50" x2="280" y2="50" class="arrow" />
+  <line x1="460" y1="50" x2="510" y2="50" class="arrow" />
+</svg>
+<div class="remark">made by mezzonuts</div>
+</div>
+
+<h2>3️⃣ Customer‑Service Contextual Filtering</h2>
+<div class="diagram">
+<svg viewBox="0 0 800 200">
+  <defs><marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#34d399"/></marker></defs>
+  <rect x="60" y="30" width="140" height="60" class="box-f" />
+  <text x="70" y="55">Plan Level</text>
+  <rect x="260" y="30" width="140" height="60" class="box-f" />
+  <text x="270" y="55">Industry Verticial</text>
+  <rect x="460" y="30" width="140" height="60" class="box-f" />
+  <text x="470" y="55">Subscription Status</text>
+  <rect x="660" y="30" width="140" height="60" class="box-f" />
+  <text x="670" y="55">Language Preference</text>
+  <line x1="200" y1="60" x2="260" y2="60" class="arrow" />
+  <line x1="400" y1="60" x2="460" y2="60" class="arrow" />
+  <line x1="600" y1="60" x2="660" y2="60" class="arrow" />
+</svg>
+<div class="remark">made by mezzonuts</div>
+</div>
+
+<h2>4️⃣ Feedback Loop & Quality Improvement</h2>
+<div class="diagram">
+<svg viewBox="0 0 800 200">
+  <defs><marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#34d399"/></marker></defs>
+  <rect x="100" y="30" width="180" height="60" class="box" />
+  <text x="110" y="55">Response Sent</text>
+  <rect x="320" y="30" width="120" height="60" class="box-bus" />
+  <text x="330" y="55">Thumbs Up/Down</text>
+  <line x1="280" y1="60" x2="320" y2="60" class="arrow" />
+  <rect x="460" y="30" width="180" height="60" class="box-sec" />
+  <text x="470" y="55">Store Feedback</text>
+  <line x1="440" y1="60" x2="460" y2="60" class="arrow" />
+</svg>
+<div class="remark">made by mezzonuts</div>
+</div>
+
+<h2>5️⃣ Knowledge Base Schema (Supabase pgvector)</h2>
+<div class="diagram">
+<svg viewBox="0 0 900 300">
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#a78bfa"/></marker>
+  </defs>
+  <!-- Knowledge Base -->
+  <rect x="20" y="20" width="260" height="140" class="box-db" />
+  <text x="30" y="40" font-size="10">Knowledge Base Articles</text>
+  <text x="30" y="55" font-size="9">id UUID PK</text>
+  <text x="30" y="70" font-size="9">title VARCHAR</text>
+  <text x="30" y="85" font-size="9">category VARCHAR</text>
+  <text x="30" y="100" font-size="9">source VARCHAR</text>
+  <text x="30" y="115" font-size="9">industry VARCHAR[]</text>
+  <text x="30" y="130" font-size="9">plan_level VARCHAR[]</text>
+  <text x="30" y="145" font-size="9">language VARCHAR</text>
+  <text x="30" y="160" font-size="9">content TEXT</text>
+  <text x="30" y="175" font-size="9">is_active BOOLEAN</text>
+  <!-- Chunks -->
+  <rect x="320" y="40" width="220" height="120" class="box" />
+  <text x="330" y="60" font-size="10">Chunks</text>
+  <text x="330" y="75" font-size="9">id UUID PK</text>
+  <text x="330" y="90" font-size="9">knowledge_base_id FK</text>
+  <text x="330" y="105" font-size="9">chunk_text TEXT</text>
+  <text x="330" y="120" font-size="9">chunk_index INT</text>
+  <text x="330" y="135" font-size="9">chunk_embedding vector(1536)</text>
+  <text x="330" y="150" font-size="9">metadata JSONB</text>
+  <!-- Vector Embeddings -->
+  <rect x="580" y="60" width="260" height="80" class="box-bus" />
+  <text x="590" y="80" font-size="10">Vector Embeddings</text>
+  <text x="590" y="95" font-size="9">id UUID PK</text>
+  <text x="590" y="110" font-size="9">chunk_id FK</text>
+  <text x="590" y="125" font-size="9">embedding vector(1536)</text>
+  <text x="590" y="140" font-size="9">metadata JSONB</text>
+  <!-- Feedback -->
+  <rect x="20" y="200" width="260" height="80" class="box-sec" />
+  <text x="30" y="220" font-size="10">Feedback</text>
+  <text x="30" y="235" font-size="9">id UUID PK</text>
+  <text x="30" y="250" font-size="9">message_id FK</text>
+  <text x="30" y="265" font-size="9">rating INT</text>
+  <text x="30" y="280" font-size="9">reason TEXT</text>
+  <text x="30" y="295" font-size="9">is_hard_negative BOOLEAN</text>
+  <text x="30" y="310" font-size="9">created_at TIMESTAMP</text>
+  <!-- Human Handoff -->
+  <rect x="320" y="200" width="260" height="80" class="box-sec" />
+  <text x="330" y="220" font-size="10">Human Handoff</text>
+  <text x="330" y="235" font-size="9">id UUID PK</text>
+  <text x="330" y="250" font-size="9">user_phone VARCHAR</text>
+  <text x="330" y="265" font-size="9">query TEXT</text>
+  <text x="330" y="280" font-size="9">confidence_score FLOAT</text>
+  <text x="330" y="295" font-size="9">retrieved_context TEXT</text>
+  <text x="330" y="310" font-size="9">resolution TEXT</text>
+  <text x="330" y="325" font-size="9">escalated_to VARCHAR</text>
+  <text x="330" y="340" font-size="9">created_at TIMESTAMP</text>
+  <!-- Relations -->
+  <line x1="280" y1="90" x2="320" y2="90" class="arrow" />
+  <line x1="540" y1="100" x2="580" y2="100" class="arrow" />
+  <line x1="150" y1="200" x2="150" y2="220" class="arrow" />
+  <line x1="150" y1="280" x2="150" y2="300" class="arrow" />
+  <line x1="380" y1="200" x2="380" y2="220" class="arrow" />
+</svg>
+<div class="remark">made by mezzonuts</div>
+</div>
+</div>
+</body>
+</html>

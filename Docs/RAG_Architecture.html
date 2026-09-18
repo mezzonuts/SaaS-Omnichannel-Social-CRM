@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAG Architecture — Customer Service Centric</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.8/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:true,theme:'dark',securityLevel:'loose'});</script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Inter',system-ui,sans-serif;background:#1E1E2E;color:#F9FAFB;padding:2rem;}
+  h1{color:#7C3AED;margin-bottom:0.5rem;border-bottom:2px solid #7C3AED;padding-bottom:0.5rem;}
+  h2{color:#A78BFA;margin-top:2rem;margin-bottom:1rem;}
+  .mermaid{background:#2D2D44;padding:1.5rem;border-radius:12px;margin-bottom:2rem;border:1px solid #44403C;}
+  .note{background:#2D2D44;padding:1rem 1.5rem;border-radius:8px;border-left:4px solid #7C3AED;margin-bottom:1.5rem;color:#D4D4D8;font-size:0.9rem;}
+  .card{background:#2D2D44;padding:1.5rem;border-radius:8px;margin-bottom:1rem;border:1px solid #44403C;}
+  .card h3{color:#7C3AED;margin-bottom:0.5rem;}
+</style>
+</head>
+<body>
+<h1>RAG Architecture — Customer Service Centric</h1>
+<div class="note">Mermaid v10.9.8 | AutoChat Hub — Knowledge Engine for WhatsApp AI Agents</div>
+
+<h2>1️⃣ RAG Pipeline Overview (End-to-End)</h2>
+<div class="mermaid">
+flowchart TD
+    subgraph INGEST["📥 Ingestion Layer"]
+        A1[Source Docs] --> A2[Document Parser]
+        A2 --> A3[Text Chunker]
+        A3 --> A4[Embedder Model]
+        A4 --> A5[Vector Store]
+    end
+
+    subgraph QUERY["🔍 Query Processing"]
+        B1[User Message] --> B2[Query Intent Classifier]
+        B2 --> B3[Query Embedder]
+        B3 --> B4[Hybrid Retriever]
+        B4 --> B5[Re-Ranker]
+        B5 --> B6[Context Builder]
+    end
+
+    subgraph GENERATE["💬 Generation Layer"]
+        C1[LLM Agent]
+        C2[System Prompt]
+        C3[Retrieved Context]
+        C4[Conversation History]
+        C3 & C2 & C4 --> C1
+        C1 --> C5[Response]
+    end
+
+    subgraph FEEDBACK["🔄 Feedback Loop"]
+        D1[User Rating] --> D2[Quality Scorer]
+        D2 --> D3[Hard Negatives Store]
+        D3 --> A5
+        D2 --> D4[Retrain Embedder]
+    end
+
+    INGEST --> QUERY --> GENERATE
+    GENERATE --> FEEDBACK
+    FEEDBACK -.->|Update Vector Store| INGEST
+</div>
+
+<h2>2️⃣ Multi-Source Knowledge Base Architecture</h2>
+<div class="mermaid">
+graph TD
+    subgraph Sources[Knowledge Sources]
+        S1[3GPP Specs<br/>TS 36.214/38.215/23.501]
+        S2[Product Manuals<br/>AutoChat Hub Docs]
+        S3[Troubleshooting Guides<br/>Per TS Category]
+        S4[FAQ & Drip Campaign<br/>Templates]
+        S5[Customer Feedback<br/>Historical Tickets]
+        S6[Industry Regulations<br/>Telekomsel / Indosat<br/>OJK Guidelines]
+    end
+
+    subgraph Pipeline[Processing Pipeline]
+        P1[Document Parser<br/>PDF/MD/DOCX]
+        P2[Chunker<br/>Semantic + Fixed]
+        P3[Embedder<br/>text-embedding-3-small]
+        P4[Chunk Store<br/>pgvector / Qdrant]
+    end
+
+    subgraph Retrieval[Retrieval Engine]
+        R1[Query Transformer]
+        R2[Hybrid Search<br/>Dense + Sparse]
+        R3[Re-Ranker<br/>Cohere / cross-encoder]
+        R4[Context Assembler<br/>Top-K + Filters]
+    end
+
+    subgraph Delivery[Delivery Layer]
+        D1[Agent Hana<br/>Helpdesk Tier-1]
+        D2[Agent Ian<br/>IT Support Tier-2]
+        D3[Agent Sarah<br/>Sales & Onboarding]
+        D4[Agent Budi<br/>Billing Agent]
+        D5[Copilot LLM<br/>Gemini 1.5 Flash]
+    end
+
+    S1 --> P1
+    S2 --> P1
+    S3 --> P1
+    S4 --> P1
+    S5 --> P1
+    S6 --> P1
+    P1 --> P2
+    P2 --> P3
+    P3 --> P4
+    R1 --> R2
+    R2 --> R3
+    R3 --> R4
+    P4 -->|Vector DB| R2
+    R4 --> D1
+    R4 --> D2
+    R4 --> D3
+    R4 --> D4
+    D1 & D2 & D3 & D4 --> E5[Copilot LLM]
+    D5 -.-> E5
+</div>
+
+<h2>3️⃣ Customer-Service Contextual Filtering</h2>
+<div class="mermaid">
+graph TD
+    U[User Query] --> C[Extract Metadata]
+    C -->|phone| T[Tenant Lookup<br/>Supabase]
+    C -->|intent| I[Intent Classifier]
+    T -->|plan, tier, history| F[Context Filter]
+    I -->|domain, topic| F
+    F -->|filtered context| R[Retrieval Engine]
+    R --> G[Generate Response]
+    G -->|source citation| U
+
+    subgraph Filter[Context Filters]
+        F1[Plan Level<br/>Starter/Growth/Scale]
+        F2[Industry Vertical<br/>Klinik/Bimbel/Properti]
+        F3[Subscription Status<br/>Active/Trial/Expired]
+        F4[Language Preference<br/>ID / EN]
+        F5[Chat History<br/>Last 5 messages]
+        F6[Geo-Location<br/>Indonesia region]
+    end
+
+    T --> F1
+    T --> F2
+    T --> F3
+    C --> F4
+    C --> F5
+    C --> F6
+</div>
+
+<h2>4️⃣ Feedback Loop & Quality Improvement</h2>
+<div class="mermaid">
+flowchart LR
+    A[Response Sent to User] --> B[Thumbs Up/Down]
+    B -->|Thumbs Down| C[Store as Hard Negative]
+    B -->|Thumbs Up| D[Store as Positive Example]
+    C --> E[Re-Ranker Fine-Tuning]
+    D --> E
+    E --> F[Embedding Model Update]
+    F --> G[Vector Store Refresh]
+    G --> H[Better Future Answers]
+    C -->|Confidence < 0.7| I[Auto-Escalate to Human]
+    I --> J[Founder/Agent Review]
+    J --> K[Add New KB Article]
+    K --> G
+</div>
+
+<h2>5️⃣ Knowledge Base Schema (Supabase pgvector)</h2>
+<div class="mermaid">
+erDiagram
+    KB_BER {
+        UUID id PK
+        string title
+        string category
+        string source
+        string[] industry
+        string[] plan_level
+        string language
+        text content
+        boolean is_active
+    }
+    
+    CH_BER {
+        UUID id PK
+        UUID knowledge_base_id FK
+        text chunk_text
+        int chunk_index
+        vector(1536) chunk_embedding
+        jsonb metadata
+    }
+    
+    VS_BER {
+        UUID id PK
+        UUID chunk_id FK
+        vector(1536) embedding
+        jsonb metadata
+    }
+    
+    FA_BER {
+        UUID id PK
+        UUID message_id FK
+        int rating
+        text reason
+        boolean is_hard_negative
+        timestamp created_at
+    }
+    
+    HU_BER {
+        UUID id PK
+        string user_phone
+        text query
+        float confidence_score
+        text retrieved_context
+        text resolution
+        string escalated_to
+        timestamp created_at
+    }
+    
+    KB_BER ||--o{ CH_BER : "1:N chunks"
+    CH_BER ||--|| VS_BER : "1:1 embeddings"
+    KB_BER ||--o{ FA_BER : "1:N feedback"
+    KB_BER ||--o{ HU_BER : "1:N handoffs"
+</div>
+
+</body>
+</html>

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AutoChat Hub - Architecture & Pipelines</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.8/dist/mermaid.min.js"></script>
+<script>
+  mermaid.initialize({ startOnLoad: true, theme: 'dark', securityLevel: 'loose' });
+</script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: #1E1E2E;
+    color: #F9FAFB;
+    padding: 2rem;
+    line-height: 1.6;
+  }
+  h1 {
+    color: #7C3AED;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    border-bottom: 2px solid #7C3AED;
+    padding-bottom: 0.5rem;
+  }
+  h2 {
+    color: #A78BFA;
+    font-size: 1.4rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+  }
+  .mermaid-container {
+    background: #2D2D44;
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    border: 1px solid #44403C;
+    overflow-x: auto;
+  }
+  .mermaid-container svg {
+    max-width: 100%;
+    height: auto;
+  }
+  .note {
+    background: #2D2D44;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    border-left: 4px solid #7C3AED;
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+    color: #D4D4D8;
+  }
+</style>
+</head>
+<body>
+
+<h1>AutoChat Hub - Architecture & Pipelines</h1>
+
+<div class="note">
+  <strong>Note:</strong> All diagrams use Mermaid JS v10.9.8. Render in any modern browser (Chrome, Firefox, Edge).
+</div>
+
+<h2>1. Technical Architecture</h2>
+<div class="mermaid-container">
+<div class="mermaid">
+graph TD
+    FE[Frontend<br/>Next.js App Router<br/>Tailwind + Shadcn UI] -->|API Calls| BE[Backend API Layer]
+
+    subgraph Backend[Backend Node.js]
+        BE[API Layer<br/>Next.js API Routes]
+        Auth[Supabase Auth]
+        DB[(Supabase<br/>PostgreSQL)]
+        REQ[Redis Queue<br/>Upstash]
+        WA[WhatsApp Engine<br/>Meta Cloud API]
+        WA_U[Baileys<br/>fallback]
+        PAY[Payment Gateway<br/>Midtrans / Mayar]
+        LLM[LLM Engine<br/>Gemini / Groq]
+    end
+
+    FE -->|Auth Token| Auth
+    Auth --> DB
+    BE --> DB
+    BE --> REQ
+    REQ --> WA
+    REQ --> WA_U
+    WA -->|Inbound/Outbound| FE
+    WA_U -->|Inbound/Outbound| FE
+    WA -->|Webhook events| PAY
+    PAY -->|Payment status| BE
+    BE --> LLM
+    LLM -->|AI reply| BE
+
+    subgraph Cloud[Cloud Services]
+        Vercel[Vercel Edge Deploy]
+        SupabaseSC[(Supabase<br/>Realtime)]
+        Upstash[Upstash Redis]
+        MetaAPI[Meta Cloud API]
+        MidtransAPI[Midtrans API]
+        GeminiAPI[Google Gemini API]
+    end
+
+    Vercel --> FE
+    SupabaseSC -.-> DB
+    SupabaseSC -.-> Auth
+    Upstash -.-> REQ
+    MetaAPI -.-> WA
+    MidtransAPI -.-> PAY
+    GeminiAPI -.-> LLM
+
+    Alert[Alert/Log Service] -->|Error| BE
+    Alert -->|Escalation| Founder[Founder WhatsApp/Telegram]
+</div>
+</div>
+
+<h2>2. CI / CD Pipeline</h2>
+<div class="mermaid-container">
+<div class="mermaid">
+flowchart TD
+    subgraph CI[CI Pipeline]
+        C1[Checkout repo] --> C2[Install deps npm ci]
+        C2 --> C3[Lint and type check]
+        C3 --> C4[Unit and integration tests]
+        C4 --> C5[Build Next.js]
+    end
+    subgraph CD[CD Pipeline]
+        D1[Deploy to Vercel] --> D2[Preview URL]
+        D2 --> D3[Smoke test]
+        D3 -->|OK| D4[Promote to Production]
+        D4 --> D5[Notify Slack Discord]
+    end
+    C5 --> D1
+    D1 --> D2 --> D3 -->|OK| D4 --> D5
+</div>
+</div>
+
+<h2>3. SDLC Process</h2>
+<div class="mermaid-container">
+<div class="mermaid">
+stateDiagram-v2
+    [*] --> Requirement
+    Requirement --> Design
+    Design --> Implementation
+    Implementation --> Testing
+    Testing --> Deployment
+    Deployment --> Monitoring
+    Monitoring --> Feedback
+    Feedback --> Requirement
+</div>
+</div>
+
+<h2>4. Business Model Canvas</h2>
+<div class="mermaid-container">
+<div class="mermaid">
+graph LR
+    A[Customer Segments] --> B[Value Propositions]
+    B --> C[Channels]
+    C --> D[Customer Relationships]
+    D --> E[Revenue Streams]
+    E --> F[Key Resources]
+    F --> G[Key Activities]
+    G --> H[Key Partnerships]
+    H --> I[Cost Structure]
+
+    A ---|Segmen| A1[Klinik Kecantikan]
+    A ---|Segmen| A2[Bimbel EduTech]
+    A ---|Segmen| A3[Agen Properti]
+    A ---|Segmen| A4[Fashion F&B]
+
+    B ---|Value| B1[Auto reminder]
+    B ---|Value| B2[Auto reply]
+    B ---|Value| B3[QR IS payment]
+    B ---|Value| B4[Multi agent inbox]
+
+    C ---|Channel| C1[WhatsApp Cloud]
+    C ---|Channel| C2[Vercel Landing]
+    C ---|Channel| C3[Demo WA bot]
+
+    D ---|Relationship| D1[Self service portal]
+    D ---|Relationship| D2[AI 24 7 support]
+    D ---|Relationship| D3[Onboarding video]
+
+    E ---|Revenue| E1[Subscription tiered]
+    E ---|Revenue| E2[QRIS transaction fee]
+
+    F ---|Resource| F1[Supabase DB]
+    F ---|Resource| F2[Vercel hosting]
+    F ---|Resource| F3[Meta WhatsApp API]
+    F ---|Resource| F4[Midtrans / Mayar]
+    F ---|Resource| F5[Gemini / Groq LLM]
+
+    G ---|Activity| G1[Frontend API dev]
+    G ---|Activity| G2[Integration WA payment]
+    G ---|Activity| G3[CI CD monitoring]
+
+    H ---|Partner| H1[Meta]
+    H ---|Partner| H2[Midtrans Mayar]
+    H ---|Partner| H3[Supabase]
+    H ---|Partner| H4[Vercel]
+
+    I ---|Cost| I1[Cloud services]
+    I ---|Cost| I2[LLM tokens]
+    I ---|Cost| I3[Development]
+</div>
+</div>
+
+<h2>5. Data Flow WhatsApp to AI to QRIS</h2>
+<div class="mermaid-container">
+<div class="mermaid">
+sequenceDiagram
+    participant User as Customer WhatsApp
+    participant WA as WhatsApp Cloud API
+    participant Queue as Redis Upstash Queue
+    participant API as Backend API
+    participant LLM as LLM Engine Gemini Groq
+    participant QR as Midtrans QRIS
+    participant DB as Supabase DB
+
+    User->>WA: Kirim pesan inbound
+    WA->>Queue: Push ke queue
+    Queue->>API: Pull dan proses
+    API->>DB: Simpan ambil contact state
+    alt Need AI reply
+        API->>LLM: Request auto reply
+        LLM-->>API: AI response
+    else Need QR IS
+        API->>QR: Generate QR IS
+        QR-->>API: QR URL
+    end
+    API->>WA: Kirim pesan outbound
+    WA-->>User: Terima balasan
+    User->>QR: Scan QR IS bayar
+    QR->>API: Webhook payment success
+    API->>DB: Update invoice status
+    API->>WA: Kirim konfirmasi pembayaran
+</div>
+</div>
+
+</body>
+</html>

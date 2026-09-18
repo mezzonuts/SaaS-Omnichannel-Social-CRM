@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='UTF-8'>
+<title>Security Architecture</title>
+<script src='https://cdn.jsdelivr.net/npm/mermaid@10.9.8/dist/mermaid.min.js'></script>
+<script>mermaid.initialize({startOnLoad:true,theme:'dark',securityLevel:'loose'});</script>
+<style>
+  body{font-family:Inter,system-ui,sans-serif;background:#1e1e2e;color:#f9fafb;padding:2rem;}
+  h1{color:#7c3aed;margin-bottom:1rem;}
+  .mermaid{background:#2d2d44;padding:1.5rem;border-radius:8px;}
+</style>
+</head>
+<body>
+<h1>Security Architecture & Controls</h1>
+<div class='mermaid'>
+graph TD
+    subgraph Frontend[Web Front‑end (Next.js)]
+        UI[UI / React] -->|HTTPS| LB[Load‑Balancer (TLS termination)]
+    end
+
+    subgraph Backend[Backend (Node.js / Supabase)]
+        API[API Routes] -->|JWT / API‑Key| Auth[Auth Service (Supabase Auth)]
+        Auth -->|Session JWT| DB[Supabase PostgreSQL]
+        API -->|Signed webhook| WA[WhatsApp Cloud Engine]
+        API -->|Signed request| PAY[Midtrans / Mayar]
+    end
+
+    subgraph Security[Security Layers]
+        WAF[Web Application Firewall]
+        IDS[Intrusion Detection / Rate‑Limiter]
+        Secrets[Secret Manager (env / vault)]
+        Audits[Audit Log & SIEM]
+        CSP[Content‑Security‑Policy]
+    end
+
+    LB -->|TLS 1.3| WAF --> API
+    API --> IDS
+    IDS -->|Block/Throttle| WA
+    IDS --> PAY
+    Secrets --> API
+    Secrets --> WA
+    Secrets --> PAY
+    Audits --> API
+    Audits --> WA
+    Audits --> PAY
+    UI -->|CSP| CSP
+</div>
+</body>
+</html>
