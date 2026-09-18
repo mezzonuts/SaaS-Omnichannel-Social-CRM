@@ -1,0 +1,27 @@
+- name: OpenCode GitHub Action
+  # You may pin to the exact commit or the version.
+  # uses: dceoy/opencode-action@0ff64486494c3134c46df6ce0e51eda4a64e349f
+  uses: dceoy/opencode-action@v0.7.3
+  with:
+    # Model to use, in provider/model format
+    model: 
+    # Agent to use as the run's default_agent. A slash command's frontmatter agent takes precedence.
+    agent: # optional, default is build
+    # Whether to share the opencode session
+    share: # optional, default is false
+    # Custom prompt to override the default prompt. Leading Markdown slash commands are expanded before opencode github run.
+    prompt: # optional, default is 
+    # Whether to use GITHUB_TOKEN directly instead of OpenCode App token exchange. When true, skips OIDC and uses the GITHUB_TOKEN env var.
+    use-github-token: # optional, default is false
+    # Comma-separated list of trigger phrases (case-insensitive)
+    mentions: # optional, default is /opencode,/oc
+    # Model variant for provider-specific reasoning effort (e.g., high, max, minimal). Empty runs every model with its default configuration. The action rejects a nonempty value only when its bundled model registry is known to be authoritative; otherwise the requested variant is passed through unchanged for OpenCode/provider validation.
+    variant: # optional, default is 
+    # Base URL for OIDC token exchange API. Only required when running a custom GitHub App install.
+    oidc-base-url: # optional, default is https://api.opencode.ai
+    # OpenCode version to install (e.g., v1.2.3)
+    opencode-version: # optional, default is latest
+    # Whether to use the action's bundled .opencode/ agents, commands, skills, and supporting configuration.
+    use-bundled-toolkit: # optional, default is true
+    # Maximum minutes to let 'opencode github run' execute before it is killed (uses 'timeout'/'gtimeout' when available; otherwise runs without an enforced timeout).
+    timeout-minutes: # optional, default is 60
